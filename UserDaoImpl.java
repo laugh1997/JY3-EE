@@ -1,120 +1,60 @@
 package com.neuedu.dao;
 
+import com.neuedu.DataSource.DruidDataSource;
 import com.neuedu.pojo.User;
-import com.neuedu.utils.DBUtils;
+import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl implements Userdao{
 
+    private QueryRunner qr = null;
+    private DruidDataSource dds = DruidDataSource.getDataSource();
 
-
-
-    //注册
-    @Override
-    public void regsiter(String user, String psw) {
-        Connection conn = null;
-        PreparedStatement pstm = null;
-        try {
-            conn = DBUtils.getConnection();
-            String sql = "INSERT INTO User (username,pasd) VALUES (?,?)";
-            pstm = conn.prepareStatement(sql);
-            pstm.setString(1, user);
-            pstm.setString(2, psw);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            DBUtils.closerpstm(pstm);
-            DBUtils.closeConnection(conn);
-        }
+    public UserDaoImpl()
+    {
+    qr = new QueryRunner();
     }
 
-    //登陆
-//    @Override
-//    public boolean login(String user, String psw) {
-//        Connection conn = null;
-//        PreparedStatement pstam = null;
-//        ResultSet rs = null;
-//        try {
-//            conn = DBUtils.getConnertion();
-//            String sql = "SELECT  username,pasd FROM User GROUP BY id";
-//            pstam = conn.prepareStatement(sql);
-//            rs = pstam.executeQuery();
-//            while (rs.next()){
-//                String username = rs.getString("username");
-//                String pasd = rs.getString("pasd");
-//                if (username.equals(user) && pasd.equals(psw)){
-//                    return true;
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }finally {
-//            DBUtils.closerrs(rs);
-//            DBUtils.closerpstm(pstam);
-//            DBUtils.closeConnection(conn);
-//        }
-//        return  false;
-//    }
 
     @Override
-        public User login(User user) {
-        Connection conn = null;
-        PreparedStatement pstm = null;
-        ResultSet rs = null;
+    public List<User> getAllUser() {
+        String sql = "SELECT * FROM User";
+        List<User> users = null;
+       Connection conn = dds.getConnection();
         try {
-            conn = DBUtils.getConnection();
-            String sql = "SELECT  username,pasd FROM User WHERE username=? AND pasd=?";
-            pstm = conn.prepareStatement(sql);
-            pstm.setString(1,user.getUsername());
-            pstm.setString(2,user.getPassword());
-            rs = pstm.executeQuery();
-           if (rs.next()){
-               return user;
-           }
+           users = qr.query(conn, sql, new BeanListHandler<>(User.class));
         } catch (SQLException e) {
             e.printStackTrace();
         }finally {
-            DBUtils.closerrs(rs);
-            DBUtils.closerpstm(pstm);
-            DBUtils.closeConnection(conn);
+            try {
+                DbUtils.close(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
-        return null;
+        return users;
     }
 
+//修改
     @Override
     public void update(User user) {
-
-        Connection conn =null;
-        PreparedStatement pstm = null;
+     String sql = "UPDATE User SET username=? pasd=? WHERE id=?";
+        Connection connection = dds.getConnection();
         try {
-            conn = DBUtils.getConnection();
-            String sql = "UPDATE User SET pasd=? WHERE username=?";
-            pstm = conn.prepareStatement(sql);
-            pstm.setString(1,user.getPassword());
-            pstm.setString(2,user.getUsername());
-            pstm.executeUpdate();
+            qr.update(connection,sql,user.getUsername(),user.getPasd(),user.getId());
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                DbUtils.close(connection);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
-
-
-    //MD5加密
-//    @Override
-//    public String getMD5String(String str) {
-//        try {
-//            MessageDigest md = MessageDigest.getInstance("MD5");
-//            md.update(str.getBytes());
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 }
