@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "UpdateServlet",urlPatterns = "/update.do")
-public class UpdateServlet extends HttpServlet {
+@WebServlet(name = "DeleServlet",urlPatterns = "/dele.do")
+public class DeleServlet extends HttpServlet {
     private Userdao ud;
     @Override
     public void init() throws ServletException {
@@ -21,11 +21,10 @@ public class UpdateServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.valueOf(request.getParameter("id"));
-        String username = request.getParameter("username");
-        String pasd = request.getParameter("pasd");
-        ud.update(new User(id,username,pasd));
+        ud.del(id);
         response.sendRedirect("user.do");
     }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     doPost(request,response);
     }
