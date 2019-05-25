@@ -1,33 +1,38 @@
-package com.neuedu.dao;
+package com.neuedu.JavaItems.Dao;
 
-import com.neuedu.DataSource.DruidDataSource;
-import com.neuedu.pojo.User;
+import com.neuedu.JavaItems.DataSource.DruidDataSource;
+import com.neuedu.JavaItems.pojo.User;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
-public class UserDaoImpl implements Userdao{
 
-    private QueryRunner qr = null;
-    private DruidDataSource dds = DruidDataSource.getDataSource();
+public class UserDaoImpl implements UserDao{
+
+//拿到连接池
+    DruidDataSource ds = DruidDataSource.getDataSource();
+
+//拿到QuerryRunner对象
+    private QueryRunner qr;
 
     public UserDaoImpl()
     {
-    qr = new QueryRunner();
+        qr = new QueryRunner();
     }
 
-
+//注册
     @Override
-    public List<User> getAllUser() {
-        String sql = "SELECT * FROM User";
-        List<User> users = null;
-       Connection conn = dds.getConnection();
+    public void regOneAccount(String userName, String passWord, Date addDate) {
+        Connection conn = ds.getConnection();
+        String sql = "INSERT INTO user (userName,PassWord,addDate) VALUES (?,?,?)";
         try {
-           users = qr.query(conn, sql, new BeanListHandler<>(User.class));
+            qr.update(conn,sql,userName,passWord,addDate);
         } catch (SQLException e) {
             e.printStackTrace();
         }finally {
@@ -37,24 +42,23 @@ public class UserDaoImpl implements Userdao{
                 e.printStackTrace();
             }
         }
-        return users;
     }
 
-//修改
+//登陆
     @Override
-    public void update(User user) {
-     String sql = "UPDATE User SET username=? pasd=? WHERE id=?";
-        Connection connection = dds.getConnection();
+    public boolean userLogin(String userName, String passWord) {
+        Connection conn = ds.getConnection();
+        String sql = "SELECT userName,passWord FROM user WHERE userName=? AND passWord=?";
         try {
-            qr.update(connection,sql,user.getUsername(),user.getPasd(),user.getId());
+            User query = qr.query(conn, sql, new BeanHandler<>(User.class), userName, passWord);
+            if (query != null)
+            {
+                return true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
-            try {
-                DbUtils.close(connection);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
+        return  false;
     }
+
 }

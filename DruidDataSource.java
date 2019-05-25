@@ -1,25 +1,27 @@
-package com.neuedu.DataSource;
+package com.neuedu.JavaItems.DataSource;
 
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
 public class DruidDataSource {
 
-//读取resouce内文件
+//拿到resource内文件
+private static Properties prop = new Properties();
 
-    private static DruidDataSource ds = null;
+private static DruidDataSource ds = null;
 
-    private static Properties prop = new Properties();
-    private DruidDataSource()
+//构造器私有
+    private  DruidDataSource()
     {
 
     }
 
 //保证连接池单例
-    public static DruidDataSource getDataSource()
+    public  static  DruidDataSource getDataSource()
     {
         if (null == ds)
         {
@@ -28,8 +30,7 @@ public class DruidDataSource {
         return ds;
     }
 
-
-//拿到链接
+//拿链接
     public Connection getConnection()
     {
         try {
@@ -37,15 +38,19 @@ public class DruidDataSource {
             DataSource dataSource = DruidDataSourceFactory.createDataSource(prop);
             Connection connection = dataSource.getConnection();
             return connection;
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
+//测试能否拿到链接
     public static void main(String[] args) {
-        DruidDataSource dataSource = DruidDataSource.getDataSource();
-        Connection connection = dataSource.getConnection();
+        DruidDataSource duridDataSource = DruidDataSource.getDataSource();
+        Connection connection = duridDataSource.getConnection();
         System.out.println(connection);
     }
+
 }

@@ -1,23 +1,17 @@
-package com.neuedu.dao;
+package com.neuedu.JavaItems.Dao;
 
-import com.neuedu.pojo.User;
+import com.neuedu.JavaItems.pojo.User;
 
-/*
-* UserDao接口
-* */
+import java.sql.Date;
+
 public interface UserDao {
 
 //注册
-    void regsiter(String user,String psw);
+    void regOneAccount(String userName, String passWord, Date addDate);
 
 //登陆
-//    boolean login(String user,String psw);
-        User login(User user);
+    boolean userLogin(String userName,String passWord);
 
-//修改
-    void update(User user);
 
-//加密
-//   String getMD5String(String str);
 
 }
